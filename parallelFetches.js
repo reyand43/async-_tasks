@@ -33,6 +33,5 @@ async function run(links: string[], limit: number) {
       return p;
     }
     await Promise.all(promises.map(chainNext));
-    setState(result);
     return result;
   }
