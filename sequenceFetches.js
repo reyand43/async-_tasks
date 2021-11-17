@@ -2,10 +2,6 @@ async function run(links: string[], callback: (result: any) => void) {
     function transformInPromise(link: string, prevRes: any) {
       return fetch(link)
         .then((res) => res.json())
-        .then((res) => {
-          console.log('PREV res', prevRes);
-          return res;
-        })
         .then((res) => [...prevRes, res]);
     }
 
