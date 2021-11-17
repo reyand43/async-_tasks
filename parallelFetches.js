@@ -8,19 +8,19 @@ async function run(links: string[], limit: number) {
     };
 
     //создаем массив из ссылка-индекс
-    const argsCopy = links.map((link, index) => ({ link, index }));
+    const linksWithIndexes = links.map((link, index) => ({ link, index }));
     //создаем массив для результатов
     const result = new Array(links.length);
     //создаем массив зарезолвенных промисов
     const promises = new Array(limit).fill(Promise.resolve());
 
     function chainNext(p: any) {
-      console.log('Вызвалась функция');
-      if (argsCopy.length) {
-        const arg = argsCopy.shift();
-        return p.then(() => {
+      if (linksWithIndexes.length) {
+        const arg = linksWithIndexes.shift();
+        return p.finally(() => {
           if (linksMap.has(arg?.link)) {
             result[arg.index] = linksMap.get(arg?.link);
+            return chainNext(Promise.resolve());
           } else {
             const operationPromise = asyncFetch(arg?.link).then((r) => {
               result[arg.index] = r;
@@ -32,6 +32,10 @@ async function run(links: string[], limit: number) {
       }
       return p;
     }
-    await Promise.all(promises.map(chainNext));
+    await Promise.all(
+      promises.map((p) => {
+        chainNext(p);
+      }),
+    );
     return result;
-  }
+}
