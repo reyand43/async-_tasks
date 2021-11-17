@@ -1,18 +1,27 @@
 async function run(links: string[], callback: (result: any) => void) {
     function transformInPromise(link: string, prevRes: any) {
-      return fetch(link)
-        .then((res) => res.json())
-        .then((res) => [...prevRes, res]);
+      if (prevRes)
+        return fetch(link)
+          .then((res) => {
+            if (res.status !== 200) {
+              return Promise.reject();
+            } else {
+              return res.json();
+            }
+          })
+          .then((res) => [...prevRes, res]);
     }
 
     const seqFetches = function (links: string[]) {
       return links.reduce(function (promise: any, link: any) {
-        return promise.then(function (res: any) {
-          return transformInPromise(link, res);
-        });
+        return promise
+          .then(function (res: any) {
+            return transformInPromise(link, res);
+          })
+          .catch(callback);
       }, Promise.resolve([]));
     };
-    seqFetches(links).then((res: any) => callback(res));
+    seqFetches(links).then(callback);
   }
 
 run(links, (res) => console.log(res));
