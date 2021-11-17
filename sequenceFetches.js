@@ -3,7 +3,7 @@ async function run(links: string[], callback: (result: any) => void) {
       if (prevRes)
         return fetch(link)
           .then((res) => {
-            if (res.status !== 200) {
+            if (res.ok !== 200) {
               return Promise.reject();
             } else {
               return res.json();
